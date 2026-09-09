@@ -1,0 +1,4 @@
+interface:
+  display_name: "Loop Everything"
+  short_description: "Run bounded agent loops toward a user goal"
+  default_prompt: "Use $loop-everything to run this goal in a bounded, self-checking agent loop."
