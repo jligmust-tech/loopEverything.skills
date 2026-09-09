@@ -5,6 +5,7 @@ Contributions should make the loop more reliable without turning it into an unbo
 ## Guidelines
 
 - Keep the skill domain-agnostic: it should work for coding, research, content, data, and other user-authorized tasks.
+- Keep the core protocol agent-neutral; host-specific discovery, commands, frontmatter, and scheduling belong in portability documentation or optional adapter metadata.
 - Preserve the active-task default and require a hard user-defined iteration limit for automatic execution.
 - Keep the loop contract explicit: objective, work unit, parameters, success evidence, stop rules, and output.
 - Prefer objective gates and concrete verification over "looks good" judgments.
@@ -16,6 +17,8 @@ Contributions should make the loop more reliable without turning it into an unbo
 
 The main instructions live in `.agents/skills/loop-everything/SKILL.md`. Put mode-specific detail in `references/` only when it improves progressive disclosure. Keep `agents/openai.yaml` metadata aligned with the skill description and invocation behavior.
 
+Core SKILL.md must remain valid for Agent Skills-compatible hosts; Codex-only metadata stays optional.
+
 ## Validation checklist
 
 Before opening a change:
@@ -25,4 +28,4 @@ Before opening a change:
 3. Exercise at least one map-loop prompt and one converge-loop prompt.
 4. Check that the skill stops early on success and stops on its hard iteration limit.
 5. Check that a missing target boundary, acceptance gate, or authorization produces a precise clarification or human-review stop.
-
+6. Check that the core skill remains host-neutral and that references/portability.md resolves.

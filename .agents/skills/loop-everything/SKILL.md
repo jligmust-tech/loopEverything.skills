@@ -1,11 +1,23 @@
 ---
 name: loop-everything
 description: Turn a user goal, task, target list, or parameter set into a bounded, self-checking agent loop. Use when the user wants the agent to keep working automatically across iterations, and keep the loop inside the active task by default; use background scheduling only when explicitly requested.
+license: MIT
 ---
 
 # Loop Everything
 
 Convert an ordinary request into an explicit loop contract, then drive the work until the objective is reached, a stop condition fires, or the user must decide something. The loop is agent-driven: after each verified iteration, choose the next useful action without waiting for a new user prompt.
+
+## Portability and host adapters
+
+The loop protocol in this file is host-neutral. It requires only an agent that can load an Agent Skills-compatible SKILL.md and execute the tools available in the current task. Discovery, invocation, persistence, scheduling, and approval handling are host adapters, not assumptions of the loop itself. See `portability.md` in references for installation notes.
+
+- Codex: keep this folder under `.agents/skills/loop-everything/`; invoke it with the host's skill mechanism, such as `$loop-everything`. Active mode runs in the current task. Heartbeats and scheduled automations are optional host features for background mode.
+- Claude Code: copy or symlink this folder to `.claude/skills/loop-everything/`; invoke it with the host's skill mechanism, such as `/loop-everything`. Do not require Claude-only frontmatter or commands in the core protocol.
+- OpenCode: `.agents/skills/loop-everything/` is a supported project location; `.opencode/skills/loop-everything/` is also supported when that host's project layout is preferred.
+- Other agents: install the complete folder in the agent's documented Agent Skills-compatible project or user directory, preserving `SKILL.md` and the relative `references/` files. Use the host's own invocation and continuation mechanism.
+
+Active mode works without a scheduler. Background mode needs an external trigger and durable state; this skill never implies that an agent or repository-local file is a daemon.
 
 ## Defaults and boundaries
 
@@ -47,8 +59,6 @@ Do a lightweight readiness check before acting:
 
 ## Active-task loop protocol
 
-## Active-task loop protocol
-
 Use this protocol when the user has not explicitly asked for a later or scheduled run:
 
 1. **Normalize and scope.** State the objective, loop kind, work unit, iteration cap, and success criteria in one compact checkpoint. If the request is ambiguous in a way that changes the target, ask the next single blocking question instead of guessing.
@@ -74,7 +84,7 @@ Respect normal approval and safety boundaries at every iteration. If an action n
 
 Use background mode only when the user explicitly asks the agent to continue later, run on a schedule, monitor something, or keep working without the active task. Read [background-mode.md](references/background-mode.md) for the state and automation rules.
 
-Prefer a heartbeat attached to the current task when the user wants continuation of this same work. Use a standalone scheduled automation only when the user asks for independent recurring runs or a specific schedule. Create or update the automation through the host's automation tool; do not invent a cron expression in the user-facing response when the host can represent the schedule directly.
+Use the host's same-task continuation mechanism when the user wants the loop to remain part of this task. Use a standalone scheduled job only when the user wants independent recurring runs or a specific schedule. The trigger may be a Codex heartbeat, a Claude Code hook or scheduled runner, an OpenCode-compatible external scheduler, CI, or a user-run command; select only mechanisms the current host actually exposes. Create or update recurring execution through the host's native automation or scheduling mechanism; do not invent raw scheduler directives in the user-facing response when the host can represent the schedule directly.
 
 The background prompt must carry the objective, loop kind, iteration cap, current state location, stop rules, and notification policy. Each run must rehydrate state, perform at most the remaining budget, verify progress, persist state, and stop or schedule the next continuation. Keep notifications quiet while the state is unchanged or non-actionable; notify on meaningful progress, completion, failure, or required user input.
 

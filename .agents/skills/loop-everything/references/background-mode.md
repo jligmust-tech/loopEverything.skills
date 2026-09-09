@@ -2,15 +2,25 @@
 
 Use this reference only when the user explicitly requests work after the active task, recurring execution, monitoring, or a scheduled continuation.
 
+## Host adapters
+
+The scheduler is an external trigger, not part of the loop protocol. Bind the protocol to the current host's documented continuation mechanism:
+
+- Codex: a heartbeat attached to the active task or a standalone scheduled automation.
+- Claude Code: a hook, scheduled runner, or other external continuation mechanism supported by the user's setup. Claude-only skill fields are optional adapters and must not be required by the core loop.
+- OpenCode and other agents: an external scheduler, CI job, task runner, or user-run continuation command. Use the host's documented skill directory and invocation syntax.
+
+If no trigger is available, provide the durable state and the next-run prompt or command for the user or an external runner. Never claim that the skill itself runs in the background.
+
 ## Choose the host mode
 
-- Use a heartbeat attached to the current task when the work should continue the same conversation and project context.
-- Use a standalone scheduled automation when the user asks for an independent task per run or gives a recurring schedule that should not depend on the current conversation staying active.
+- Use the host's same-task continuation mechanism when the work should continue in the same conversation and project context.
+- Use a standalone scheduled job when the user asks for an independent task per run or gives a recurring schedule that should not depend on the current conversation staying active.
 - If the user asks for a schedule but does not provide enough timing detail, ask one question for the schedule. Do not guess a business-critical time zone or recurrence.
 
 ## State
 
-Heartbeat runs may use the current task context, but still keep a compact progress record in the conversation or in a project-local state file when the run spans substantial work. Standalone scheduled runs need a durable, project-local state file. Use a clearly named `.loop-everything/` directory and do not store secrets in it.
+Same-task continuation may use the current task context, but still keep a compact progress record in the conversation or in a project-local state file when the run spans substantial work. Standalone scheduled runs need a durable, project-local state file. Use a clearly named `.loop-everything/` directory and do not store secrets in it.
 
 The state should contain only what is needed to resume:
 
@@ -42,7 +52,7 @@ For a subjective objective with no objective gate, do not claim unattended compl
 
 ## Automation behavior
 
-When creating or updating an automation, its human-readable prompt should tell the future run to:
+When creating or updating a recurring trigger, its human-readable prompt should tell the future run to:
 
 1. Load the loop state and verify that the project and target still match.
 2. Stop if the state is `completed`, `blocked`, `failed`, or `stopped`.

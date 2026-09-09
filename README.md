@@ -1,11 +1,22 @@
 # Loop Everything
 
-`loop-everything` is a Codex skill for turning a user's goal, task, target list, or parameter set into a bounded, self-checking agent loop.
+`loop-everything` is an Agent Skills-compatible workflow skill for turning a user's goal, task, target list, or parameter set into a bounded, self-checking agent loop.
 
 It is designed for two modes:
 
 - Active-task mode (default): the agent keeps working in the current task until the goal is complete, blocked, or the user-defined iteration limit is reached.
-- Background mode (optional): when explicitly requested, the agent uses a Codex heartbeat or scheduled automation and resumes from compact durable state.
+- Background mode (optional): when explicitly requested, the agent uses the current host's same-task continuation mechanism or an external scheduler and resumes from compact durable state.
+
+## Portability
+
+The canonical portable skill folder is `.agents/skills/loop-everything/`.
+
+- **Codex:** use the folder in `.agents/skills/` and invoke it through the native skill mechanism, for example `$loop-everything`.
+- **Claude Code:** copy or symlink the folder to `.claude/skills/loop-everything/` and invoke it through the native skill mechanism, for example `/loop-everything`.
+- **OpenCode:** `.agents/skills/` is a supported project location; `.opencode/skills/` is also available when preferred by the host.
+- **Other agents:** place the complete folder in the host's documented Agent Skills-compatible directory and preserve the relative `references/` files.
+
+The optional `agents/openai.yaml` file provides Codex-specific UI metadata. Other agents can ignore it; the portable contract lives in `SKILL.md` and its referenced files.
 
 ## What it does
 
@@ -49,7 +60,7 @@ The skill does not grant permission for destructive changes, external messages, 
 
 ## Background runs
 
-Background execution is opt-in. A future run is a trigger, not a daemon: the automation must reload the loop state, check the remaining budget before acting, perform a bounded work unit, verify it, persist state, and schedule another run only when needed.
+Background execution is opt-in. A future run is a trigger, not a daemon: the host trigger must reload the loop state, check the remaining budget before acting, perform a bounded work unit, verify it, persist state, and schedule another run only when needed.
 
 For scheduled work, state is kept under `.loop-everything/` in the project and must not contain passwords, API keys, private keys, tokens, or other secrets. Notifications stay quiet while nothing meaningful changes and fire for progress, completion, failure, or required user input.
 
@@ -60,11 +71,13 @@ Subjective goals without an objective acceptance gate remain in the active task 
 ```text
 .agents/skills/loop-everything/
 |-- SKILL.md
-|-- agents/openai.yaml
-`-- references/background-mode.md
+|-- agents/openai.yaml              # Optional Codex UI metadata
+`-- references/
+    |-- background-mode.md
+    `-- portability.md
 ```
 
-Codex discovers the skill from the repository-scoped `.agents/skills` directory. If a skill update does not appear, restart or refresh Codex.
+Codex and OpenCode can discover the canonical folder from `.agents/skills`. Claude Code users should copy or symlink it into `.claude/skills/loop-everything/`. If a skill update does not appear, restart or refresh the relevant agent.
 
 ## Validate changes
 
@@ -78,5 +91,4 @@ Also test realistic prompts for one-shot work, finite target maps, convergence t
 
 ## Scope
 
-This repository contains an instruction-only skill. It does not run a local watcher or scheduler by itself; active execution is driven by the Codex task, and background execution is driven by the host's automation capability.
-
+This repository contains an instruction-only skill. It does not run a local watcher or scheduler by itself; active execution is driven by the current agent task, and background execution is driven by a host automation capability or external runner.
