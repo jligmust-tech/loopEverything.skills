@@ -1,0 +1,3 @@
+# Runtime state for scheduled or resumable loops is machine-local.
+.loop-everything/
+
